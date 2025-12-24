@@ -6,9 +6,9 @@
 
 **A powerful, cross-platform desktop application for comprehensive website SEO analysis, web crawling, and AI-powered insights.**
 
-[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Avalonia](https://img.shields.io/badge/Avalonia-11.x-8B44AC?logo=avalonia)](https://avaloniaui.net/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 [Features](#-features) • [Installation](#-installation) • [User Guide](#-user-guide) • [AI Integration](#-ai-integration) • [Testing](#-testing)
 
@@ -54,14 +54,14 @@
 
 ### Prerequisites
 - **OS**: Verified on macOS Sequoia 15.2, Windows 11, and Linux.
-- **.NET 9.0 SDK**: [Download here](https://dotnet.microsoft.com/download/dotnet/9.0)
+- **.NET 8.0 SDK**: [Download here](https://dotnet.microsoft.com/download/dotnet/8.0)
 
 ### Getting Started
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/swallows.git
-   cd swallows
+   git clone https://github.com/Nicola898989/Swallows.git
+   cd Swallows
    ```
 
 2. **Build the project:**
@@ -180,4 +180,9 @@ The tests cover:
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)** - see the [LICENSE](LICENSE) file for details.
+
+This license guarantees that:
+- Anyone can freely use, modify, and distribute this software.
+- Any modifications or derived works **must also remain open source** under the same GPLv3 license.
+- The software remains free for everyone, forever.
