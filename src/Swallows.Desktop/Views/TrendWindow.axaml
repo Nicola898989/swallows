@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        x:Class="Swallows.Desktop.Views.TrendWindow"
+        x:DataType="vm:TrendViewModel"
+        Title="📈 Trend Analysis"
+        Width="1100" Height="800"
+        Icon="/Assets/swallows.png">
+    
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="25">
+            
+            <!-- Header -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="📈 Trend Analysis" FontSize="28" FontWeight="Bold"/>
+                <TextBlock Text="{Binding ScanUrl}" FontSize="14" Foreground="#64748B"/>
+                <TextBlock Text="{Binding TotalScans, StringFormat='Based on {0} historical scans'}" 
+                           FontSize="12" Foreground="#94A3B8"/>
+            </StackPanel>
+            
+            <!-- Time Range Selector -->
+            <Border Background="White" Padding="15" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" Spacing="15">
+                    <TextBlock Text="Time Range:" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <ComboBox SelectedItem="{Binding TimeRange}" Width="150">
+                        <ComboBoxItem Content="Last 7 Days"/>
+                        <ComboBoxItem Content="Last 30 Days" IsSelected="True"/>
+                        <ComboBoxItem Content="Last 90 Days"/>
+                        <ComboBoxItem Content="All Time"/>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+            
+            <!-- SEO Score Chart -->
+            <Border Background="White" Padding="20" CornerRadius="12" 
+                    BorderBrush="#E2E8F0" BorderThickness="1"
+                    BoxShadow="0 1 3 0 #10000000">
+                <StackPanel Spacing="15">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="📊" FontSize="20"/>
+                        <TextBlock Text="SEO Score Evolution" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <lvc:CartesianChart Series="{Binding SeoScoreSeries}" 
+                                        Height="280"
+                                        LegendPosition="Bottom"/>
+                    <TextBlock Text="Higher scores indicate better SEO optimization (title, meta, structure, performance)" 
+                               FontSize="11" Foreground="#64748B" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Error Count Chart -->
+            <Border Background="White" Padding="20" CornerRadius="12" 
+                    BorderBrush="#E2E8F0" BorderThickness="1"
+                    BoxShadow="0 1 3 0 #10000000">
+                <StackPanel Spacing="15">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="❌" FontSize="20"/>
+                        <TextBlock Text="Error Pages Trend" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <lvc:CartesianChart Series="{Binding ErrorCountSeries}" 
+                                        Height="280"
+                                        LegendPosition="Bottom"/>
+                    <TextBlock Text="Pages with HTTP status codes other than 200 (e.g., 404, 500, 503)" 
+                               FontSize="11" Foreground="#64748B" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Page Count Chart -->
+            <Border Background="White" Padding="20" CornerRadius="12" 
+                    BorderBrush="#E2E8F0" BorderThickness="1"
+                    BoxShadow="0 1 3 0 #10000000">
+                <StackPanel Spacing="15">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="📄" FontSize="20"/>
+                        <TextBlock Text="Website Growth" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <lvc:CartesianChart Series="{Binding PageCountSeries}" 
+                                        Height="280"
+                                        LegendPosition="Bottom"/>
+                    <TextBlock Text="Total number of pages discovered during each scan" 
+                               FontSize="11" Foreground="#64748B" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Performance Chart -->
+            <Border Background="White" Padding="20" CornerRadius="12" 
+                    BorderBrush="#E2E8F0" BorderThickness="1"
+                    BoxShadow="0 1 3 0 #10000000">
+                <StackPanel Spacing="15">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="⚡" FontSize="20"/>
+                        <TextBlock Text="Average Load Time" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <lvc:CartesianChart Series="{Binding LoadTimeSeries}" 
+                                        Height="280"
+                                        LegendPosition="Bottom"/>
+                    <TextBlock Text="Average page load time in milliseconds - lower is better for SEO" 
+                               FontSize="11" Foreground="#64748B" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Insights Summary -->
+            <Border Background="#F0F9FF" Padding="25" CornerRadius="12" 
+                    BorderBrush="#BFDBFE" BorderThickness="2">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="💡 Insights Summary" FontSize="18" FontWeight="Bold" Foreground="#1E40AF"/>
+                    <TextBlock Text="{Binding InsightsSummary}" 
+                               TextWrapping="Wrap"
+                               FontSize="14"
+                               LineHeight="24"
+                               Foreground="#1E3A8A"/>
+                </StackPanel>
+            </Border>
+            
+        </StackPanel>
+    </ScrollViewer>
+</Window>

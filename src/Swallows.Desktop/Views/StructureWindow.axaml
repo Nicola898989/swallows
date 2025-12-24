@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        xmlns:models="using:Swallows.Core.Models"
+        x:Class="Swallows.Desktop.Views.StructureWindow"
+        x:DataType="vm:StructureWindowViewModel"
+        Title="Site Structure - Swallows"
+        Width="600" Height="800"
+        Icon="/Assets/swallows.png"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Inter">
+
+    <Design.DataContext>
+        <vm:StructureWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto, *">
+        <Border Grid.Row="0" Background="#F8FAFC" Padding="15" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Status}" Foreground="#64748B" FontSize="12"/>
+            </StackPanel>
+        </Border>
+
+        <TreeView Grid.Row="1" ItemsSource="{Binding Nodes}" Margin="10">
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate DataType="models:StructureNode" ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="📁" IsVisible="{Binding IsDirectory}" Foreground="#F59E0B"/>
+                        <TextBlock Text="📄" IsVisible="{Binding !IsDirectory}" Foreground="#94A3B8"/>
+                        <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                        <Border Background="#E2E8F0" CornerRadius="10" Padding="6,2" Margin="5,0,0,0">
+                            <TextBlock Text="{Binding PageCount}" FontSize="10" Foreground="#475569"/>
+                        </Border>
+                    </StackPanel>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </Grid>
+</Window>

@@ -1,0 +1,584 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="Swallows.Desktop.Views.MainWindow"
+        x:Name="Root"
+        x:DataType="vm:MainWindowViewModel"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        Icon="/Assets/swallows.png"
+        Title="Swallows - Dashboard di Analisi"
+        Background="#F6F7F8"
+        FontFamily="Inter">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <!-- Keyboard Shortcuts -->
+    <Window.KeyBindings>
+        <!-- Ctrl+N: New Scan -->
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding StartScanCommand}"/>
+        
+        <!-- Ctrl+E: Export -->
+        <KeyBinding Gesture="Ctrl+E" Command="{Binding ExportScanCommand}"/>
+        
+        <!-- Ctrl+H: History -->
+        <KeyBinding Gesture="Ctrl+H" Command="{Binding OpenHistoryCommand}"/>
+        
+        <!-- Ctrl+S: Settings -->
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding OpenSettingsCommand}"/>
+        
+        <!-- Ctrl+P: Pause/Resume -->
+        <KeyBinding Gesture="Ctrl+P" Command="{Binding PauseScanCommand}"/>
+        
+        <!-- Esc: Stop -->
+        <KeyBinding Gesture="Escape" Command="{Binding StopScanCommand}"/>
+    </Window.KeyBindings>
+    
+    <Window.Styles>
+        <Style Selector="TextBlock.h1">
+             <Setter Property="FontSize" Value="24"/>
+             <Setter Property="FontWeight" Value="Bold"/>
+             <Setter Property="Foreground" Value="#0F172A"/> 
+        </Style>
+        <Style Selector="TextBlock.h2">
+             <Setter Property="FontSize" Value="18"/>
+             <Setter Property="FontWeight" Value="SemiBold"/>
+             <Setter Property="Foreground" Value="#0F172A"/> 
+        </Style>
+        <Style Selector="TextBlock.body">
+             <Setter Property="FontSize" Value="14"/>
+             <Setter Property="Foreground" Value="#64748B"/> 
+        </Style>
+        
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1392EC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1182D2"/>
+             <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BoxShadow" Value="0 1 3 0 #10000000"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid>
+        <!-- MAIN CONTENT -->
+        <Grid RowDefinitions="Auto, *">
+            
+            <!-- HEADER -->
+            <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="24">
+                <StackPanel Spacing="20">
+                    
+                    <!-- Top Row: Title + Global Tools -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0">
+                             <TextBlock Text="Analysis Dashboard" Classes="h1"/>
+                             <TextBlock Text="{Binding StatusMessage}" Foreground="#1392EC" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                            <Button Command="{Binding OpenHistoryCommand}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" ToolTip.Tip="View Scan History">
+                                <TextBlock Text="📜 History"/>
+                            </Button>
+                            <Button Command="{Binding OpenComparisonCommand}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" ToolTip.Tip="Compare Scans">
+                                <TextBlock Text="⚖️ Compare"/>
+                            </Button>
+                            <Button Command="{Binding OpenMarketplaceCommand}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" ToolTip.Tip="AI Models">
+                                <TextBlock Text="🛍️ Market"/>
+                            </Button>
+                            <Button Command="{Binding OpenSettingsCommand}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" ToolTip.Tip="Settings">
+                                <TextBlock Text="⚙️ Settings"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Scan Controls Row -->
+                    <Border Background="#F8FAFC" CornerRadius="8" Padding="15">
+                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <WrapPanel.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Margin" Value="0,0,10,10"/>
+                                </Style>
+                                <Style Selector="TextBox">
+                                    <Setter Property="Margin" Value="0,0,10,10"/>
+                                </Style>
+                                 <Style Selector="ComboBox">
+                                    <Setter Property="Margin" Value="0,0,10,10"/>
+                                </Style>
+                            </WrapPanel.Styles>
+
+                            <TextBox Watermark="Enter URL to scan..." Text="{Binding UrlToScan}" Width="400" CornerRadius="6" BorderBrush="#CBD5E1"/>
+                            <ComboBox ItemsSource="{Binding UserAgents}" SelectedItem="{Binding SelectedUserAgent}" Width="220" CornerRadius="6" BorderBrush="#CBD5E1"/>
+                            
+                            <Button Classes="primary" Command="{Binding StartScanCommand}" IsEnabled="{Binding !IsScanRunning}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="▶️"/>
+                                    <TextBlock Text="{Binding ScanButtonText}"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Classes="primary" Command="{Binding PauseScanCommand}" IsVisible="{Binding IsScanRunning}" Background="#F59E0B">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="⏸️"/>
+                                    <TextBlock Text="Pause"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Command="{Binding StopScanCommand}" IsVisible="{Binding IsScanRunning}" Background="#EF4444" Foreground="White" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="⏹️"/>
+                                    <TextBlock Text="Stop"/>
+                                </StackPanel>
+                            </Button>
+                         </WrapPanel>
+                    </Border>
+                    
+                    <!-- Analysis & Results Toolbar (Active when Scan Selected) -->
+                    <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="10" IsVisible="{Binding SelectedScan, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <WrapPanel Orientation="Horizontal">
+                             <WrapPanel.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Margin" Value="0,0,8,8"/>
+                                    <Setter Property="Padding" Value="12,8"/>
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Style>
+                            </WrapPanel.Styles>
+                            
+                            <TextBlock Text="Results:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,15,8" Foreground="#64748B"/>
+
+                            <Button Command="{Binding OpenTrendCommand}" Background="#EFF6FF" BorderBrush="#BFDBFE" Foreground="#1D4ED8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="📈"/>
+                                    <TextBlock Text="Trends"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding OpenSeoAuditCommand}" Background="#F0FDF4" BorderBrush="#BBF7D0" Foreground="#15803D">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="📊"/>
+                                    <TextBlock Text="SEO Audit"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding OpenStructureCommand}" Background="#F5F3FF" BorderBrush="#DDD6FE" Foreground="#6D28D9">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="�"/>
+                                    <TextBlock Text="Structure"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding OpenAiCommand}" Background="#FFF7ED" BorderBrush="#FFEDD5" Foreground="#C2410C">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="🧠"/>
+                                    <TextBlock Text="AI Auditor"/>
+                                </StackPanel>
+                            </Button>
+                            
+                             <Rectangle Width="1" Height="24" Fill="#E2E8F0" Margin="5,0,15,8"/>
+                             
+                             <TextBlock Text="Export:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,15,8" Foreground="#64748B"/>
+
+                            <Button Command="{Binding ExportGraphCommand}" ToolTip.Tip="View Interactive Graph">
+                                <TextBlock Text="🕸️ Graph"/>
+                            </Button>
+                            <Button Command="{Binding GenerateSitemapCommand}" ToolTip.Tip="Save sitemap.xml">
+                                <TextBlock Text="🗺️ Sitemap"/>
+                            </Button>
+                            <Button Command="{Binding ExportScanCommand}" ToolTip.Tip="Save as CSV">
+                                <TextBlock Text="📄 CSV"/>
+                            </Button>
+
+                             <Rectangle Width="1" Height="24" Fill="#E2E8F0" Margin="5,0,15,8"/>
+                             
+                             <!-- Columns Dropdown -->
+                             <Button Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="12,8">
+                               <Button.Flyout>
+                                   <Flyout Placement="BottomEdgeAlignedRight">
+                                       <ScrollViewer MaxHeight="400">
+                                           <ItemsControl ItemsSource="{Binding ColumnOptions}">
+                                               <ItemsControl.ItemTemplate>
+                                                   <DataTemplate>
+                                                       <CheckBox IsChecked="{Binding IsVisible}" Content="{Binding Header}" Margin="0,2"/>
+                                                   </DataTemplate>
+                                               </ItemsControl.ItemTemplate>
+                                           </ItemsControl>
+                                       </ScrollViewer>
+                                   </Flyout>
+                               </Button.Flyout>
+                               <StackPanel Orientation="Horizontal" Spacing="6">
+                                   <TextBlock Text="👁️ Columns"/>
+                                   <TextBlock Text="▼" FontSize="10" VerticalAlignment="Center" Foreground="#64748B"/>
+                               </StackPanel>
+                            </Button>
+
+                        </WrapPanel>
+                    </Border>
+
+                </StackPanel>
+            </Border>
+
+            <!-- SCROLLABLE CONTENT -->
+            <ScrollViewer Grid.Row="1">
+                <StackPanel Margin="30" Spacing="30">
+                    
+                    <!-- STATS GRID -->
+                    <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="Auto" >
+                        <Grid.Styles>
+                           <Style Selector="Grid > Border">
+                               <Setter Property="Margin" Value="0,0,20,0"/>
+                           </Style>
+                           <Style Selector="Grid > Border:nth-last-child(1)">
+                               <Setter Property="Margin" Value="0"/>
+                           </Style>
+                        </Grid.Styles>
+
+                        <!-- Stat 1: Scanned -->
+                        <Border Grid.Column="0" Classes="card">
+                            <StackPanel>
+                                <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                                     <Border Background="#E6F4FD" CornerRadius="8" Padding="6">
+                                         <TextBlock Text="🚀" Foreground="#1392EC"/>
+                                     </Border>
+                                </Grid>
+                                <TextBlock Text="Pages Scanned" Classes="body"/>
+                                <TextBlock Text="{Binding PagesScanned}" Classes="h1" FontSize="30"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Stat 2: Remaining -->
+                        <Border Grid.Column="1" Classes="card">
+                             <StackPanel>
+                                <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                                     <Border Background="#FEF2F2" CornerRadius="8" Padding="6">
+                                         <TextBlock Text="⏳" Foreground="#DC2626"/>
+                                     </Border>
+                                </Grid>
+                                <TextBlock Text="Remaining (Queue)" Classes="body"/>
+                                <TextBlock Text="{Binding PagesRemaining}" Classes="h1" FontSize="30"/>
+                            </StackPanel>
+                        </Border>
+
+                         <!-- Stat 3: Total -->
+                        <Border Grid.Column="2" Classes="card">
+                             <StackPanel>
+                                <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                                     <Border Background="#F3E8FF" CornerRadius="8" Padding="6">
+                                         <TextBlock Text="∑" Foreground="#9333EA"/>
+                                     </Border>
+                                </Grid>
+                                <TextBlock Text="Total Predicted" Classes="body"/>
+                                <TextBlock Text="{Binding PagesTotal}" Classes="h1" FontSize="30"/>
+                            </StackPanel>
+                        </Border>
+                        
+                         <!-- Stat 4: UA -->
+                        <Border Grid.Column="3" Classes="card" Margin="0">
+                             <StackPanel>
+                                <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                                     <Border Background="#FFF7ED" CornerRadius="8" Padding="6">
+                                         <TextBlock Text="⏱️" Foreground="#EA580C"/>
+                                     </Border>
+                                </Grid>
+                                <TextBlock Text="Progress" Classes="body"/>
+                                <TextBlock Text="{Binding ProgressText}" Classes="h1" FontSize="12" TextWrapping="Wrap" MaxLines="3"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Chart Section -->
+                    <Border Classes="card" Margin="0,0,0,15" MinHeight="200" IsVisible="{Binding SelectedScan, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <Grid RowDefinitions="Auto, *, Auto, *">
+                            <TextBlock Text="Crawl Depth Distribution" Classes="h2" Margin="0,0,0,10"/>
+                            <lvc:CartesianChart Grid.Row="1" Series="{Binding DepthSeries}" XAxes="{Binding DepthXAxes}" YAxes="{Binding DepthYAxes}" Height="250"/>
+                            
+                            <TextBlock Grid.Row="2" Text="Response Time (ms) Trend" Classes="h2" Margin="0,20,0,10"/>
+                            <lvc:CartesianChart Grid.Row="3" Series="{Binding ResponseTimeSeries}" XAxes="{Binding ResponseTimeXAxes}" YAxes="{Binding ResponseTimeYAxes}" Height="250"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- MAIN RESULTS TABLE -->
+                    <Border Classes="card" Padding="0" MinHeight="400">
+                        <StackPanel>
+                            <Border Padding="25" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+                                <Grid ColumnDefinitions="*, Auto, Auto">
+                                    <StackPanel>
+                                        <TextBlock Text="Scanned Pages" Classes="h2"/>
+                                        <TextBlock Text="{Binding SelectedScan.BaseUrl, StringFormat='Results for {0}', TargetNullValue='No scan selected'}" Classes="body" FontSize="12"/>
+                                    </StackPanel>
+                                    
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedScan.Pages.Count, StringFormat='Total: {0}', TargetNullValue=''}" Foreground="#1392EC" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    
+                                    <!-- SEO Audit Button -->
+
+                                </Grid>
+                            </Border>
+
+                            <DataGrid ItemsSource="{Binding SelectedScan.Pages}" AutoGenerateColumns="False" Height="500" IsReadOnly="True" 
+                                      GridLinesVisibility="Horizontal" BorderThickness="0"
+                                      CanUserResizeColumns="True"
+                                      x:CompileBindings="False"
+                                      RowBackground="White" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding Url}" Width="100" IsVisible="{Binding DataContext.ColumnOptions[0].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="URL" ToolTip.Tip="The full address of the scanned page."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Title}" Width="100" IsVisible="{Binding DataContext.ColumnOptions[1].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Title" ToolTip.Tip="The content of the &lt;title&gt; tag."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding MetaDescription}" Width="100" IsVisible="{Binding DataContext.ColumnOptions[2].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Meta Desc" ToolTip.Tip="The content of the meta description tag."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding StatusCode}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[3].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Status" ToolTip.Tip="HTTP Response Status Code (e.g., 200 OK, 404 Not Found)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding LoadTimeMs}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[4].IsVisible, ElementName=Root}">
+                                         <DataGridTextColumn.Header>
+                                            <TextBlock Text="Load (ms)" ToolTip.Tip="Time taken to download the HTML content in milliseconds."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Depth}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[5].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Depth" ToolTip.Tip="Crawl depth level (0 = Root)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding SizeKb}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[5].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Size (KB)" ToolTip.Tip="Size of the HTML content in Kilobytes."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ImageCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[6].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Images" ToolTip.Tip="Total number of &lt;img&gt; tags found on the page."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding TextToHtmlRatio}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[7].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="TxtRatio" ToolTip.Tip="Ratio of visible text content to total HTML code size."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding InternalLinksCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[8].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Int Links" ToolTip.Tip="Number of links pointing to the same domain."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ExternalLinksCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[9].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Ext Links" ToolTip.Tip="Number of links pointing to other domains."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding H1Count}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[10].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="H1" ToolTip.Tip="Number of H1 headers found."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding H2Count}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[11].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="H2" ToolTip.Tip="Number of H2 headers found."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding H3Count}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[12].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="H3" ToolTip.Tip="Number of H3 headers found."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding CanonicalUrl}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[13].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Canonical" ToolTip.Tip="The canonical URL specified in the &lt;link rel='canonical'&gt; tag."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding MetaRobots}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[14].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Robots" ToolTip.Tip="Meta Robots directives (e.g., index, follow, noindex)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Hreflangs}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[15].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Hreflangs" ToolTip.Tip="Detected hreflang attributes for internationalization."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding RelNext}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[16].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Next" ToolTip.Tip="Pagination link: rel='next'."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding RelPrev}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[17].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Prev" ToolTip.Tip="Pagination link: rel='prev'."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding HasHsts}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[18].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="HSTS" ToolTip.Tip="Indicates if HSTS security header is present."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding IsRedirect}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[19].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Redir" ToolTip.Tip="Indicates if the request was redirected."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridTextColumn Binding="{Binding FinalUrl}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[20].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Final URL" ToolTip.Tip="The final destination URL after all redirects."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ContentHash}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[21].IsVisible, ElementName=Root}">
+                                         <DataGridTextColumn.Header>
+                                            <TextBlock Text="Hash" ToolTip.Tip="MD5 hash of the content for duplicate detection."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding RedirectChain}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[22].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Chain" ToolTip.Tip="The full path of redirects followed."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+
+                                    <!-- Extended Metrics -->
+                                    <DataGridTextColumn Binding="{Binding WordCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[23].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Words" ToolTip.Tip="Total number of visible words in the body."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding MissingAltCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[24].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="No Alt" ToolTip.Tip="Number of images missing the alt attribute."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding HasOpenGraph}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[25].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="OG" ToolTip.Tip="Indicates if Open Graph meta tags are present."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding HasTwitterCard}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[26].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Twit" ToolTip.Tip="Indicates if Twitter Card meta tags are present."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridTextColumn Binding="{Binding ScriptCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[27].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="JS" ToolTip.Tip="Number of &lt;script&gt; tags."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding StyleCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[28].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="CSS" ToolTip.Tip="Number of &lt;link rel='stylesheet'&gt; tags."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding HasViewport}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[29].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Mob" ToolTip.Tip="Indicates if Viewport meta tag is present (Mobile Friendly)."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding HasFavicon}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[30].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Icon" ToolTip.Tip="Indicates if a Favicon is defined."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+
+                                    <!-- SEO Validation -->
+                                    <DataGridCheckBoxColumn Binding="{Binding IsTitleOptimal}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[31].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Title" ToolTip.Tip="Title is SEO-optimal (10-60 chars)."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding IsDescriptionOptimal}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[32].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Desc" ToolTip.Tip="Meta Description is SEO-optimal (50-160 chars)."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridTextColumn Binding="{Binding KeywordDensity}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[33].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="KW%" ToolTip.Tip="Percentage of title keywords found in body."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+
+                                    <!-- Link Quality -->
+                                    <DataGridTextColumn Binding="{Binding BrokenLinksCount}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[34].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Broken" ToolTip.Tip="Number of broken outbound links."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding IsOrphan}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[35].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Orphan" ToolTip.Tip="Page has no incoming internal links."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    
+                                    <!-- JS Rendering -->
+                                    <DataGridCheckBoxColumn Binding="{Binding HasRenderedDifferences}" Width="90">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="JS Diff" ToolTip.Tip="Content differs when rendered with JS."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridTextColumn Binding="{Binding JsErrors}" Width="90" Foreground="Red">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="JS Errors" ToolTip.Tip="Console errors captured during rendering."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+
+                                    <!-- Module 9: Schema & Semantics & Custom -->
+                                    <DataGridTextColumn Binding="{Binding SchemaType}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[38].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Schema" ToolTip.Tip="Detected Schema.org types (JSON-LD)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding IsRichSnippetEligible}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[39].IsVisible, ElementName=Root}">
+                                        <DataGridCheckBoxColumn.Header>
+                                            <TextBlock Text="Rich" ToolTip.Tip="Eligible for Google Rich Snippets (Product, Article, etc)."/>
+                                        </DataGridCheckBoxColumn.Header>
+                                    </DataGridCheckBoxColumn>
+                                    <DataGridTextColumn Binding="{Binding ReadabilityScore, StringFormat='{}{0:F0}'}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[40].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Readbl" ToolTip.Tip="Readability Score (0-100). Higher is easier."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding TopKeywords}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[41].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Keywords" ToolTip.Tip="Top repeating words/phrases (N-Grams)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding CustomDataJson}" Width="90" IsVisible="{Binding DataContext.ColumnOptions[42].IsVisible, ElementName=Root}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Custom Data" ToolTip.Tip="Extracted data based on Custom Rules (JSON)."/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                                <DataGrid.Styles>
+                                    <Style Selector="DataGridColumnHeader">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Foreground" Value="#64748B"/>
+                                        <Setter Property="Background" Value="#F8FAFC"/>
+                                        <Setter Property="Padding" Value="10"/>
+                                    </Style>
+                                </DataGrid.Styles>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

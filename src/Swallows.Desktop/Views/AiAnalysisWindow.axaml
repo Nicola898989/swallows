@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="Swallows.Desktop.Views.AiAnalysisWindow"
+        x:DataType="vm:AiAnalysisViewModel"
+        Title="AI Analysis"
+        Width="900" Height="600"
+        Icon="/Assets/swallows.png"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto, *, Auto" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="10">
+            <TextBlock Text="AI Semantic Auditor" FontSize="20" FontWeight="Bold"/>
+            <TextBlock Text="Select an analysis type and run processing provided pages." FontSize="14" Foreground="Gray"/>
+            
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <StackPanel>
+                    <TextBlock Text="Analysis Type" FontWeight="Bold"/>
+                    <ComboBox ItemsSource="{Binding AnalysisTypes}" SelectedItem="{Binding SelectedAnalysisType}" Width="200"/>
+                </StackPanel>
+                
+                <Button Content="▶ Run Analysis" Command="{Binding RunAnalysisCommand}" IsEnabled="{Binding !IsBusy}" Classes="accent" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            
+            <ProgressBar Value="{Binding Progress}" IsVisible="{Binding IsBusy}" Height="20" ShowProgressText="True"/>
+            <TextBlock Text="{Binding StatusMessage}" Foreground="Gray" FontStyle="Italic"/>
+        </StackPanel>
+        
+        <!-- Results Grid -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Results}" Margin="0,20" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="All" BorderThickness="1" BorderBrush="Gray">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="250"/>
+                <DataGridTextColumn Header="AI Result (JSON)" Binding="{Binding ResultJson}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Close" Click="OnCloseClick"/>
+        </StackPanel>
+        
+    </Grid>
+</Window>

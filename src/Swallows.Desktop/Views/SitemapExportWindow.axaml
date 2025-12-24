@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
+        x:Class="Swallows.Desktop.Views.SitemapExportWindow"
+        x:DataType="vm:SitemapExportViewModel"
+        Icon="/Assets/swallows.png"
+        Title="Export Sitemap Options"
+        Width="400" Height="420"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Border Padding="20">
+        <StackPanel Spacing="20">
+            <TextBlock Text="Sitemap Configuration" FontSize="18" FontWeight="SemiBold" Foreground="#1E293B"/>
+
+            <!-- Images -->
+            <CheckBox IsChecked="{Binding IncludeImages}" Content="Include Images" ToolTip.Tip="Adds image:image tags for each page."/>
+
+            <Separator Background="#E2E8F0" Height="1"/>
+
+            <!-- Splitting -->
+            <CheckBox IsChecked="{Binding SplitFiles}" Content="Split into multiple files (Sitemap Index)" Name="ChkSplit"/>
+
+            <StackPanel IsVisible="{Binding SplitFiles}" Spacing="10" Margin="20,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="Max URLs per file" FontSize="12" Foreground="#64748B"/>
+                    <NumericUpDown Value="{Binding MaxUrlsPerFile}" Minimum="1" Maximum="50000" FormatString="0" Margin="0,5,0,0"/>
+                </StackPanel>
+                
+                <StackPanel>
+                    <TextBlock Text="Hosting Base URL (for index)" FontSize="12" Foreground="#64748B"/>
+                    <TextBox Text="{Binding HostingBaseUrl}" Watermark="https://example.com" Margin="0,5,0,0"/>
+                    <TextBlock Text="Required for sitemap_index.xml loc tags" FontSize="10" Foreground="#94A3B8" FontStyle="Italic"/>
+                </StackPanel>
+            </StackPanel>
+
+            <Separator Background="#E2E8F0" Height="1"/>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+                <Button Command="{Binding CancelCommand}" Content="Cancel" Background="White" BorderBrush="#E2E8F0" BorderThickness="1"/>
+                <Button Command="{Binding ExportCommand}" Content="Export" Background="#1392EC" Foreground="White"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

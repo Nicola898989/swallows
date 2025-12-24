@@ -1,0 +1,78 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+        x:Class="Swallows.Desktop.Views.HistoryWindow"
+        x:DataType="vm:HistoryWindowViewModel"
+        Icon="/Assets/swallows.png"
+        Title="Scan History"
+        Width="600" Height="450"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+    <Design.DataContext>
+        <vm:HistoryWindowViewModel/>
+    </Design.DataContext>
+    
+    <Window.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1392EC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+         <Style Selector="Button.primary:disabled">
+            <Setter Property="Background" Value="#A0CBE8"/>
+        </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DC2626"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="15,8"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1">
+        <Grid RowDefinitions="Auto, *, Auto">
+            
+            <!-- Header -->
+            <Border Grid.Row="0" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20">
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Scan History" FontSize="18" FontWeight="Bold" Foreground="#0F172A"/>
+                         <TextBlock Text="Select a past scan to view results" FontSize="12" Foreground="#64748B"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="✕" Click="Close_Click" Background="Transparent" Foreground="#64748B" FontSize="16"/>
+                </Grid>
+            </Border>
+
+            <!-- List -->
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}"
+                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                      BorderThickness="0" Margin="0,10">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Date" Binding="{Binding StartedAt, StringFormat='{}{0:g}'}" Width="150"/>
+                    <DataGridTextColumn Header="URL" Binding="{Binding BaseUrl}" Width="*"/>
+                    <DataGridTextColumn Header="Pages" Binding="{Binding TotalPagesScanned}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="20">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Classes="danger" Content="Delete" Command="{Binding DeleteScanCommand}" IsEnabled="{Binding SelectedSession, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    <Button Classes="primary" Content="Open Selected" Click="Open_Click" IsEnabled="{Binding SelectedSession, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+
+</Window>

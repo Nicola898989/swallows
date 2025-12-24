@@ -1,0 +1,172 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        x:Class="Swallows.Desktop.Views.OllamaSetupWindow"
+        x:DataType="vm:OllamaSetupViewModel"
+        Title="Ollama Setup" 
+        Width="700" Height="600"
+        Icon="/Assets/swallows.png"
+        MinWidth="600" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        CanResize="True">
+        
+    <Design.DataContext>
+        <vm:OllamaSetupViewModel/>
+    </Design.DataContext>
+
+    <Grid Margin="30" RowDefinitions="Auto,*,Auto">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="10">
+            <TextBlock Text="🤖 AI Features Setup" FontSize="24" FontWeight="Bold"/>
+            <TextBlock Text="Swallows uses Ollama to provide AI-powered analysis and content generation." 
+                       TextWrapping="Wrap" Foreground="#64748B"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <StackPanel Grid.Row="1" Spacing="20" VerticalAlignment="Center">
+            
+            <!-- Installation Info -->
+            <Border Background="#F1F5F9" Padding="20" CornerRadius="8" IsVisible="{Binding !IsLocalOllamaInstalled}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="📦 What will be installed?" FontWeight="SemiBold" FontSize="16"/>
+                    <TextBlock TextWrapping="Wrap">
+                        • Ollama AI engine (~500 MB)
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap">
+                        • Installed locally in your app data folder
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap">
+                        • No system-wide changes required
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Foreground="#94A3B8" FontSize="12" Margin="0,10,0,0">
+                        Models can be downloaded later from the AI Market as needed.
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Already Installed -->
+            <Border Background="#ECFDF5" Padding="20" CornerRadius="8" IsVisible="{Binding IsLocalOllamaInstalled}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="✓ Ollama is already installed" FontWeight="SemiBold" FontSize="16" Foreground="#10B981"/>
+                    <TextBlock Text="{Binding LocalOllamaPath}" TextWrapping="Wrap" Foreground="#6B7280" FontSize="12"/>
+                    
+                    <!-- Service Status -->
+                    <Separator Margin="0,5"/>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,5,0,0">
+                        <TextBlock Grid.Column="0" Text="Service Status:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding ServiceStatus}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <Button Grid.Column="2" Content="🔄" Command="{Binding RefreshStatusCommand}" Padding="5" IsEnabled="{Binding !IsCheckingService}"/>
+                    </Grid>
+                    
+                    <!-- Service Controls -->
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                        <Button Content="▶️ Start Service" 
+                                Command="{Binding StartServiceCommand}" 
+                                IsEnabled="{Binding !IsServiceRunning}"
+                                Background="#10B981" 
+                                Foreground="White"
+                                Padding="15,8"/>
+                        <Button Content="⏹️ Stop Service" 
+                                Command="{Binding StopServiceCommand}" 
+                                IsEnabled="{Binding IsServiceRunning}"
+                                Background="#EF4444" 
+                                Foreground="White"
+                                Padding="15,8"/>
+                    </StackPanel>
+                    
+                    <!-- Installed Models -->
+                    <Separator Margin="0,10"/>
+                    <TextBlock Text="Installed Models" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding ModelsStatus}" Foreground="#6B7280" FontSize="12"/>
+                    
+                    <ScrollViewer MaxHeight="150" 
+                                  VerticalScrollBarVisibility="Auto"
+                                  IsVisible="{Binding InstalledModels.Count}">
+                        <ItemsControl ItemsSource="{Binding InstalledModels}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F9FAFB" 
+                                            Padding="10,5" 
+                                            Margin="0,2"
+                                            CornerRadius="4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding}" 
+                                                       VerticalAlignment="Center"
+                                                       FontFamily="Consolas,Monaco,monospace"/>
+                                            <Button Grid.Column="1" 
+                                                    Content="▶️ Run" 
+                                                    Command="{Binding $parent[ItemsControl].((vm:OllamaSetupViewModel)DataContext).RunModelCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#3B82F6"
+                                                    Foreground="White"
+                                                    Padding="10,5"
+                                                    FontSize="12"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Progress -->
+            <Border Background="#FEF3C7" Padding="15" CornerRadius="8" IsVisible="{Binding IsInstalling}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Installing..." FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding InstallProgress}" TextWrapping="Wrap"/>
+                    <ProgressBar IsIndeterminate="True" Height="4" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Error -->
+            <Border Background="#FEE2E2" Padding="15" CornerRadius="8" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="⚠️ Installation Error" FontWeight="SemiBold" Foreground="#DC2626"/>
+                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="#991B1B"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Success -->
+            <Border Background="#ECFDF5" Padding="15" CornerRadius="8" IsVisible="{Binding InstallSuccessful}">
+                <StackPanel Spacing="5">
+                    <TextBlock Text="✓ Installation Successful!" FontWeight="SemiBold" Foreground="#10B981"/>
+                    <TextBlock Text="{Binding InstallProgress}" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            
+            <!-- Skip Button -->
+            <Button Content="Skip for Now" 
+                    Command="{Binding SkipCommand}"
+                    Click="OnSkipClick"
+                    IsVisible="{Binding !IsInstalling}"
+                    Padding="20,10"
+                    Background="Transparent"
+                    BorderBrush="#E2E8F0"/>
+            
+            <!-- Install Button -->
+            <Button Content="Install Ollama" 
+                    Command="{Binding InstallCommand}"
+                    IsVisible="{Binding !IsLocalOllamaInstalled}"
+                    IsEnabled="{Binding !IsInstalling}"
+                    Padding="20,10"
+                    Classes="accent"/>
+            
+            <!-- Close Button (shown after success) -->
+            <Button Content="Close" 
+                    Click="OnCloseClick"
+                    IsVisible="{Binding InstallSuccessful}"
+                    Padding="20,10"
+                    Classes="accent"/>
+                    
+        </StackPanel>
+
+    </Grid>
+</Window>

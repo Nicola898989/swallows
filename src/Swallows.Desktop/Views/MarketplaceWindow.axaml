@@ -1,0 +1,100 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        xmlns:models="using:Swallows.Core.Models"
+        x:Class="Swallows.Desktop.Views.MarketplaceWindow"
+        x:DataType="vm:MarketplaceViewModel"
+        Title="AI Model Marketplace"
+        Width="900" Height="600"
+        Icon="/Assets/swallows.png"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+        
+    <Design.DataContext>
+        <vm:MarketplaceViewModel/>
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="Auto, *, Auto" Margin="20">
+    
+        <!-- Header & Search -->
+        <StackPanel Grid.Row="0" Spacing="10">
+            <TextBlock Text="AI Model Marketplace" FontSize="20" FontWeight="Bold"/>
+            <TextBlock Text="Discover and download GGUF models from Hugging Face for local use with Ollama." Foreground="Gray"/>
+            
+            <TextBlock Text="{Binding SystemResources}" Foreground="#64748B" FontSize="12"/>
+            
+            <Grid ColumnDefinitions="*, Auto, Auto" Margin="0,15,0,0">
+                <TextBox Grid.Column="0" Watermark="Search models (e.g. 'mistral', 'llama3', 'tiny')..." Text="{Binding SearchQuery}" Margin="0,0,10,0"/>
+                <Button Grid.Column="1" Content="🔍 Search" Command="{Binding SearchCommand}" IsEnabled="{Binding !IsSearching}" Margin="0,0,10,0"/>
+                <Button Grid.Column="2" Content="⚙️ Install Ollama" Command="{Binding OpenSetupCommand}" Background="#10B981" Foreground="White"/>
+            </Grid>
+            
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsSearching}" Height="2"/>
+        </StackPanel>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" ColumnDefinitions="*, 300" Margin="0,20,0,20">
+            
+            <!-- Result List -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedModel}" 
+                      BorderThickness="1" BorderBrush="#E2E8F0" AutoGenerateColumns="False" CanUserResizeColumns="True" Margin="0,0,10,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Model ID" Binding="{Binding Id}" Width="250"/>
+                    <DataGridTextColumn Header="Author" Binding="{Binding Author}" Width="150"/>
+                    <DataGridTextColumn Header="Downloads" Binding="{Binding Downloads}" Width="80"/>
+                    <DataGridTextColumn Header="Likes" Binding="{Binding Likes}" Width="60"/>
+                    <DataGridTextColumn Header="Params" Binding="{Binding Parameters}" Width="70"/>
+                    <DataGridTextColumn Header="Last Updated" Binding="{Binding LastModified, StringFormat='{}{0:yyyy-MM-dd}'}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            
+            <!-- Details Panel -->
+            <Border Grid.Column="1" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="15" Background="#FAFAFA">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Model Details" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="{Binding SelectedModel.Id}" TextWrapping="Wrap" Foreground="#334155"/>
+                    
+                    <Separator/>
+                    
+                    <TextBlock Text="Select Quantization" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding SelectedModelFiles}" SelectedItem="{Binding SelectedFile}" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding QuantizationLevel}" FontWeight="Bold" Width="80"/>
+                                    <TextBlock Text="{Binding SizeFormatted}" Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    
+                    <TextBlock Text="Hardware Check" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                    <Border Background="{Binding HardwareStatusColor}" Padding="10" CornerRadius="5" IsVisible="{Binding HardwareStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="{Binding HardwareStatus}" FontWeight="Bold" Foreground="White" TextWrapping="Wrap"/> 
+                    </Border>
+
+                    <Separator Margin="0,10"/>
+                    
+                    <Button Content="Download Selected" 
+                            Command="{Binding DownloadCommand}" 
+                            CommandParameter="{Binding SelectedModel}"
+                            HorizontalAlignment="Stretch" Classes="accent"/>
+                            
+                    <Button Content="Create SEO Agent" 
+                            Command="{Binding CreateAgentCommand}"
+                            IsEnabled="{Binding SelectedModel, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        
+        <!-- Status & Progress -->
+        <StackPanel Grid.Row="2" Spacing="5">
+            <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding DownloadProgress}" Foreground="#3B82F6" IsVisible="{Binding IsDownloading}"/>
+            <!-- Use indeterminate for now as parsing exact percentage from Ollama output is tricky strictly -->
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsDownloading}" Height="4"/> 
+        </StackPanel>
+        
+    </Grid>
+</Window>

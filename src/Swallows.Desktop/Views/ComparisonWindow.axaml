@@ -1,0 +1,128 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Swallows.Desktop.ViewModels"
+        x:Class="Swallows.Desktop.Views.ComparisonWindow"
+        x:DataType="vm:ComparisonWindowViewModel"
+        Title="Compare Scans - Swallows"
+        Width="1000" Height="700"
+        Icon="/Assets/swallows.png"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Inter">
+
+    <Design.DataContext>
+        <vm:ComparisonWindowViewModel/>
+    </Design.DataContext>
+
+     <Window.Styles>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+         <Style Selector="TabItem">
+             <Setter Property="FontSize" Value="14"/>
+             <Setter Property="FontWeight" Value="Medium"/>
+         </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- HEADER / SELECTION -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20">
+            <StackPanel Spacing="15">
+                <TextBlock Text="Compare Scans" FontSize="20" FontWeight="Bold"/>
+                
+                <Grid ColumnDefinitions="*, 50, *, Auto">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Baseline (Old Scan)" Classes="label"/>
+                        <ComboBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedBaseline}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding BaseUrl, StringFormat='{}{0} (Details below)'}">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:g} - {1}">
+                                                <Binding Path="StartedAt"/>
+                                                <Binding Path="BaseUrl"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <TextBlock Grid.Column="1" Text="VS" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#64748B" Margin="0,20,0,0"/>
+                    
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Comparison (New Scan)" Classes="label"/>
+                         <ComboBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedComparison}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                     <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:g} - {1}">
+                                                <Binding Path="StartedAt"/>
+                                                <Binding Path="BaseUrl"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <Button Grid.Column="3" Content="Run Comparison" Command="{Binding CompareCommand}" 
+                            Margin="20,23,0,0" Padding="20,8" Background="#1392ec" Foreground="White" FontWeight="SemiBold"/>
+                </Grid>
+                
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#64748B"/>
+            </StackPanel>
+        </Border>
+
+        <!-- RESULTS TABS -->
+        <TabControl Grid.Row="1" Margin="10">
+            <!-- NEW PAGES -->
+            <TabItem Header="New URLs">
+                 <DataGrid ItemsSource="{Binding NewPages}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="*"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding NewStatusCode}" Width="80"/>
+                        <DataGridTextColumn Header="Title" Binding="{Binding NewValue}" Width="300"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- REMOVED PAGES -->
+             <TabItem Header="Removed URLs">
+                 <DataGrid ItemsSource="{Binding RemovedPages}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="*"/>
+                        <DataGridTextColumn Header="Old Status" Binding="{Binding OldStatusCode}" Width="100"/>
+                        <DataGridTextColumn Header="Old Title" Binding="{Binding OldValue}" Width="300"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            
+            <!-- STATUS CHANGES -->
+             <TabItem Header="Status Changes">
+                 <DataGrid ItemsSource="{Binding StatusChanges}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="*"/>
+                        <DataGridTextColumn Header="Old Status" Binding="{Binding OldValue}" Width="100"/>
+                        <DataGridTextColumn Header="New Status" Binding="{Binding NewValue}" Width="100" FontWeight="Bold"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            
+            <!-- META CHANGES -->
+             <TabItem Header="Metadata Changes">
+                 <DataGrid ItemsSource="{Binding MetaChanges}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="250"/>
+                        <DataGridTextColumn Header="Field" Binding="{Binding ChangeType}" Width="100"/>
+                        <DataGridTextColumn Header="Old Value" Binding="{Binding OldValue}" Width="*"/>
+                        <DataGridTextColumn Header="New Value" Binding="{Binding NewValue}" Width="*" FontWeight="Bold"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
