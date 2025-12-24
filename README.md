@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Swallows Logo](Assets/swallows.png)
+![Swallows Logo](swallows.png)
 
 **A powerful, cross-platform desktop application for comprehensive website SEO analysis, web crawling, and AI-powered insights.**
 
